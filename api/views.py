@@ -4,31 +4,34 @@ from .serializers import InvoiceSerializer, InvoiceDetailSerializer
 from .models import Invoice, InvoiceDetail
 
 # Fetch all the invoices
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def getAllInvoices(request):
-    try:
-        # Querying all the invoices
-        invoices = InvoiceDetail.objects.all()
-        # Serializing the data from the database
-        serializer = InvoiceDetailSerializer(invoices, many=True)
-        return Response(serializer.data)
-    except:
-        return Response(status=400)
+    if request.method == 'GET':
+        try:
+            # Querying all the invoices
+            invoices = InvoiceDetail.objects.all()
+            # Serializing the data from the database
+            serializer = InvoiceDetailSerializer(invoices, many=True)
+            return Response(serializer.data)
+        except:
+            return Response(serializer.errors, status=400)
+        
+        
+    # Create a new invoice instance and insert in the database
+    elif request.method == 'POST':
+        try:
+            # Creating new invoice details instance from request data and serializing it
+            serializer = InvoiceDetailSerializer(data=request.data)
+            if serializer.is_valid():
+                # Saving the data in the database
+                serializer.save()
+            return Response(serializer.data, status=201)
+        except:
+            return Response(serializer.errors, status=400)
 
-# Fetch all the customers
-@api_view(['GET'])
-def getAllCustomers(request):
-    try:
-        # Querying all the customers 
-        invoices = Invoice.objects.all()
-        # Serializing the data from the database
-        serializer = InvoiceSerializer(invoices, many=True)
-        return Response(serializer.data)
-    except:
-        return Response(status=400)
 
 # Endpoint for the CRUD operations on invoice details
-@api_view(['GET', 'POST', 'PUT', 'DELETE'])
+@api_view(['GET', 'PUT', 'DELETE'])
 def getInvoiceByID(request, pk):
     id = pk
     # Display the invoice of the specified ID
@@ -40,20 +43,8 @@ def getInvoiceByID(request, pk):
             serializer = InvoiceDetailSerializer(invoiceById, many=True)
             return Response(serializer.data)
         except:
-            return Response(status=400)
+            return Response(serializer.errors, status=400)
         
-    # Create a new invoice instance and insert in the database
-    elif request.method == 'POST':
-        try:
-            # Creating new invoice details instance from request data and serializing it
-            serializer = InvoiceDetailSerializer(data=request.data)
-            if serializer.is_valid():
-                # Saving the data in the database
-                serializer.save()
-            return Response(serializer.data)
-        except:
-            return Response(status=400)
-    
     # Check if the record exists in the database and update it
     elif request.method == 'PUT':
         try:
@@ -67,7 +58,7 @@ def getInvoiceByID(request, pk):
         serializer = InvoiceDetailSerializer(instance, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response(serializer.data, status=200)
         return Response(serializer.errors, status=400)
     
     # Check if the record exists in the database and delete it
@@ -83,3 +74,14 @@ def getInvoiceByID(request, pk):
         instance.delete()
         return Response(data={"message":"Deleted successfully"},status=200)
 
+# Fetch all the customers
+@api_view(['GET'])
+def getAllCustomers(request):
+    try:
+        # Querying all the customers 
+        invoices = Invoice.objects.all()
+        # Serializing the data from the database
+        serializer = InvoiceSerializer(invoices, many=True)
+        return Response(serializer.data)
+    except:
+        return Response(serializer.errors, status=400)
