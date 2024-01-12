@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from .serializers import InvoiceSerializer, InvoiceDetailSerializer
 from .models import Invoice, InvoiceDetail
 
-# Fetch all the invoices
+# Endpoint: "/invoices/" - Fetch all the invoices and post new invoice details instances
 @api_view(['GET', 'POST'])
 def getAllInvoices(request):
     if request.method == 'GET':
@@ -30,7 +30,7 @@ def getAllInvoices(request):
             return Response(serializer.errors, status=400)
 
 
-# Endpoint for the CRUD operations on invoice details
+# Endpoint: "/invoices/<int:pk>/" - For fetching, updating and deleting particular invoice details
 @api_view(['GET', 'PUT', 'DELETE'])
 def getInvoiceByID(request, pk):
     id = pk
@@ -74,7 +74,7 @@ def getInvoiceByID(request, pk):
         instance.delete()
         return Response(data={"message":"Deleted successfully"},status=200)
 
-# Fetch all the customers
+# Endpoint: "/invoices/allcustomers/" - Fetch all the customers
 @api_view(['GET'])
 def getAllCustomers(request):
     try:
